@@ -8,8 +8,31 @@
         Width="800"
         Height="450"
         Title="MainWindow">
-    <Grid
-        Name="grid">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <Grid
+            Name="grid">
 
+        </Grid>
+        
+        <StackPanel
+            Height="40"
+            Orientation="Horizontal"
+            Grid.Row="1">
+
+            <Button
+                Content="Next"
+                Click="Next_Click" />
+
+            <Button
+                Content="Reset"
+                Click="Reset_Click" />
+
+        </StackPanel>
     </Grid>
 </Window>
