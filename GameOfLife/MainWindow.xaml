@@ -7,32 +7,48 @@
         mc:Ignorable="d"
         Width="800"
         Height="450"
-        Title="MainWindow">
+        Title="Game Of Life">
     
     <Grid>
+        
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        
-        <Grid
-            Name="grid">
 
-        </Grid>
-        
-        <StackPanel
-            Height="40"
-            Orientation="Horizontal"
+        <Grid
+            Name="grid"
+            Grid.Row="0" />
+
+        <Grid
+            Height="50"
             Grid.Row="1">
 
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
             <Button
+                Name="bStart"
+                Margin="10"
+                Content="Start"
+                Grid.Column="0"
+                Click="Start_Click" />
+            
+            <Button
+                Margin="10"
                 Content="Next"
+                Grid.Column="1"
                 Click="Next_Click" />
 
             <Button
+                Margin="10"
                 Content="Reset"
+                Grid.Column="2"
                 Click="Reset_Click" />
 
-        </StackPanel>
+        </Grid>
     </Grid>
 </Window>

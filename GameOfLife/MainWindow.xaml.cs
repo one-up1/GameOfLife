@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,13 +14,18 @@ namespace GameOfLife
     public partial class MainWindow : Window
     {
         private const int ROW_COUNT = 16;
-        private const int COL_COUNT = 32;
+        private const int COLUMN_COUNT = 32;
 
         private Cell[][] cells;
+        private Timer timer;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            timer = new Timer(500);
+            timer.Elapsed += Timer_Elapsed;
+
             Loaded += MainWindow_Loaded;
         }
 
@@ -30,28 +37,43 @@ namespace GameOfLife
         private void Cell_MouseUp(object sender, MouseButtonEventArgs e)
         {
             Label label = (Label)sender;
-            Cell cell = cells[(int)label.GetValue(Grid.RowProperty)][(int)label.GetValue(Grid.ColumnProperty)];
+            Cell cell = cells[(int)label.GetValue(Grid.RowProperty)]
+                [(int)label.GetValue(Grid.ColumnProperty)];
             cell.Value = !cell.Value;
         }
 
+        private void Start_Click(object sender, RoutedEventArgs e)
+        {
+            if (timer.Enabled)
+            {
+                Debug.WriteLine("Stopping");
+                timer.Stop();
+                bStart.Content = "Start";
+            }
+            else
+            {
+                Debug.WriteLine("Starting");
+                timer.Start();
+                bStart.Content = "Stop";
+            }
+        }
+        
         private void Next_Click(object sender, RoutedEventArgs e)
         {
-            Cell[][] cells = new Cell[ROW_COUNT][];
-            for (int row = 0; row < ROW_COUNT; row++)
-            {
-                cells[row] = new Cell[COL_COUNT];
-                for (int col = 0; col < COL_COUNT; col++)
-                {
-                    cells[row][col] = new Cell(this.cells[row][col].Label);
-                    ProcessCell(cells, row, col);
-                }
-            }
-            this.cells = cells;
+            Next();
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
             AddCells();
+        }
+
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Dispatcher.Invoke((Action)delegate()
+            {
+                Next();
+            });
         }
 
         private void AddCells()
@@ -67,7 +89,7 @@ namespace GameOfLife
                 RowDefinition row = new RowDefinition();
                 grid.RowDefinitions.Add(row);
             }
-            for (int i = 0; i < COL_COUNT; i++)
+            for (int i = 0; i < COLUMN_COUNT; i++)
             {
                 ColumnDefinition col = new ColumnDefinition();
                 grid.ColumnDefinitions.Add(col);
@@ -77,8 +99,8 @@ namespace GameOfLife
             cells = new Cell[ROW_COUNT][];
             for (int row = 0; row < ROW_COUNT; row++)
             {
-                cells[row] = new Cell[COL_COUNT];
-                for (int col = 0; col < COL_COUNT; col++)
+                cells[row] = new Cell[COLUMN_COUNT];
+                for (int col = 0; col < COLUMN_COUNT; col++)
                 {
                     Label label = new Label();
                     label.SetValue(Grid.RowProperty, row);
@@ -91,14 +113,39 @@ namespace GameOfLife
                     cells[row][col] = new Cell(label);
                 }
             }
+
+            // Set default values.
+            cells[6][16].Value = true;
+            cells[7][17].Value = true;
+            cells[8][15].Value = true;
+            cells[8][16].Value = true;
+            cells[8][17].Value = true;
+        }
+
+        private void Next()
+        {
+            Debug.WriteLine("Next()");
+            Cell[][] cells = new Cell[ROW_COUNT][];
+            for (int row = 0; row < ROW_COUNT; row++)
+            {
+                cells[row] = new Cell[COLUMN_COUNT];
+                for (int col = 0; col < COLUMN_COUNT; col++)
+                {
+                    cells[row][col] = new Cell(this.cells[row][col].Label);
+                    ProcessCell(cells, row, col);
+                }
+            }
+            this.cells = cells;
         }
 
         private void ProcessCell(Cell[][] cells, int row, int col)
         {
             int neighbors = 0;
-            for (int iRow = row == 0 ? 0 : row - 1; iRow <= (row == ROW_COUNT - 1 ? row : row + 1); iRow++)
+            for (int iRow = row == 0 ? 0 : row - 1;
+                iRow <= (row == ROW_COUNT - 1 ? row : row + 1); iRow++)
             {
-                for (int iCol = col == 0? 0 : col - 1; iCol <= (col == COL_COUNT - 1 ? col : col + 1); iCol++)
+                for (int iCol = col == 0 ? 0 : col - 1;
+                    iCol <= (col == COLUMN_COUNT - 1 ? col : col + 1); iCol++)
                 {
                     if ((iRow != row || iCol != col) && this.cells[iRow][iCol].Value)
                     {
@@ -129,10 +176,6 @@ namespace GameOfLife
                 {
                     // Each cell with three neighbors becomes populated.
                     cells[row][col].Value = true;
-                }
-                else
-                {
-                    cells[row][col].Value = false;
                 }
             }
         }
