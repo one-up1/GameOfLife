@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GameOfLife"
         mc:Ignorable="d"
-        Width="800"
-        Height="450"
-        Title="Game Of Life">
+        Width="1200"
+        Height="675"
+        Title="Game Of Life"
+        WindowStartupLocation="CenterScreen">
     
     <Grid>
         
@@ -28,26 +29,42 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
                 <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
+
+            <Button
+                Name="bOpen"
+                Margin="10"
+                Content="Open"
+                Grid.Column="0"
+                Click="Open_Click" />
+
+            <Button
+                Name="bSave"
+                Margin="10"
+                Content="Save"
+                Grid.Column="1"
+                Click="Save_Click" />
 
             <Button
                 Name="bStart"
                 Margin="10"
                 Content="Start"
-                Grid.Column="0"
+                Grid.Column="2"
                 Click="Start_Click" />
             
             <Button
                 Margin="10"
                 Content="Next"
-                Grid.Column="1"
+                Grid.Column="3"
                 Click="Next_Click" />
 
             <Button
                 Margin="10"
-                Content="Reset"
-                Grid.Column="2"
-                Click="Reset_Click" />
+                Content="Clear"
+                Grid.Column="4"
+                Click="Clear_Click" />
 
         </Grid>
     </Grid>

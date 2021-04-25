@@ -1,5 +1,9 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Diagnostics;
+using System.IO;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,8 +17,8 @@ namespace GameOfLife
     /// </summary>
     public partial class MainWindow : Window
     {
-        private const int ROW_COUNT = 16;
-        private const int COLUMN_COUNT = 32;
+        private const int ROW_COUNT = 32;
+        private const int COLUMN_COUNT = 64;
 
         private Cell[][] cells;
         private Timer timer;
@@ -31,7 +35,14 @@ namespace GameOfLife
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            AddCells();
+            AddCells(null);
+
+            // Set default values.
+            cells[12][32].Value = true;
+            cells[13][33].Value = true;
+            cells[14][30].Value = true;
+            cells[14][32].Value = true;
+            cells[14][33].Value = true;
         }
 
         private void Cell_MouseUp(object sender, MouseButtonEventArgs e)
@@ -57,26 +68,50 @@ namespace GameOfLife
                 bStart.Content = "Stop";
             }
         }
-        
+
+        private void Open_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "JSON files (*.json)|*.json";
+            if (ofd.ShowDialog() == true)
+            {
+               AddCells(JsonConvert.DeserializeObject<Cell[][]>(
+                    File.ReadAllText(ofd.FileName)));
+            }
+        }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "JSON files (*.json)|*.json";
+            // Why do we need "== true", ShowDialog() return a boolean right?
+            if (sfd.ShowDialog() == true)
+            {
+                File.WriteAllText(sfd.FileName,
+                    JsonConvert.SerializeObject(cells));
+            }
+        }
+
         private void Next_Click(object sender, RoutedEventArgs e)
         {
             Next();
         }
 
-        private void Reset_Click(object sender, RoutedEventArgs e)
+        private void Clear_Click(object sender, RoutedEventArgs e)
         {
-            AddCells();
+            AddCells(null);
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            // The Elapsed event is not called from the UI thread.
             Dispatcher.Invoke((Action)delegate()
             {
                 Next();
             });
         }
 
-        private void AddCells()
+        private void AddCells(Cell[][] cells)
         {
             // Clear any existing cells and row/column definitions.
             grid.Children.Clear();
@@ -96,10 +131,13 @@ namespace GameOfLife
             }
 
             // Add cells.
-            cells = new Cell[ROW_COUNT][];
+            this.cells = cells == null ? new Cell[ROW_COUNT][] : cells;
             for (int row = 0; row < ROW_COUNT; row++)
             {
-                cells[row] = new Cell[COLUMN_COUNT];
+                if (cells == null)
+                {
+                    this.cells[row] = new Cell[COLUMN_COUNT];
+                }
                 for (int col = 0; col < COLUMN_COUNT; col++)
                 {
                     Label label = new Label();
@@ -108,18 +146,18 @@ namespace GameOfLife
                     label.BorderThickness = new Thickness(1);
                     label.BorderBrush = Brushes.Black;
                     label.MouseUp += Cell_MouseUp;
-
                     grid.Children.Add(label);
-                    cells[row][col] = new Cell(label);
+
+                    if (cells == null)
+                    {
+                        this.cells[row][col] = new Cell(label);
+                    }
+                    else
+                    {
+                        this.cells[row][col].Label = label;
+                    }
                 }
             }
-
-            // Set default values.
-            cells[6][16].Value = true;
-            cells[7][17].Value = true;
-            cells[8][15].Value = true;
-            cells[8][16].Value = true;
-            cells[8][17].Value = true;
         }
 
         private void Next()

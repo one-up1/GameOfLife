@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using Newtonsoft.Json;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace GameOfLife
@@ -8,19 +9,30 @@ namespace GameOfLife
         private Label label;
         private bool value;
 
+        public Cell()
+        {
+        }
+
         public Cell(Label label)
         {
             this.label = label;
         }
 
+        [JsonIgnore]
         public Label Label
         {
             get
             {
                 return label;
             }
+            set
+            {
+                this.label = value;
+                SetLabelBackground();
+            }
         }
 
+        [JsonProperty("value")]
         public bool Value
         {
             get
@@ -30,6 +42,14 @@ namespace GameOfLife
             set
             {
                 this.value = value;
+                SetLabelBackground();
+            }
+        }
+
+        private void SetLabelBackground()
+        {
+            if (label != null)
+            {
                 label.Background = value ? Brushes.Red : Brushes.Transparent;
             }
         }
