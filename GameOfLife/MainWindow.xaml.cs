@@ -141,13 +141,12 @@ namespace GameOfLife
         private void ProcessCell(Cell[][] cells, int row, int col)
         {
             int neighbors = 0;
-            for (int iRow = row == 0 ? 0 : row - 1;
-                iRow <= (row == ROW_COUNT - 1 ? row : row + 1); iRow++)
+            for (int iRow = row - 1; iRow <= row + 1; iRow++)
             {
-                for (int iCol = col == 0 ? 0 : col - 1;
-                    iCol <= (col == COLUMN_COUNT - 1 ? col : col + 1); iCol++)
+                for (int iCol = col - 1; iCol <= col + 1; iCol++)
                 {
-                    if ((iRow != row || iCol != col) && this.cells[iRow][iCol].Value)
+                    if (iRow >= 0 && iCol >= 0 && iRow < ROW_COUNT && iCol < COLUMN_COUNT
+                        && !(iRow == row && iCol == col) && this.cells[iRow][iCol].Value)
                     {
                         neighbors++;
                     }
