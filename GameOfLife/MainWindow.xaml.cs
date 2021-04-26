@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -96,16 +95,17 @@ namespace GameOfLife
                 catch
                 {
                     Debug.WriteLine("Error parsing timer interval");
+                    tbTimerInterval.SelectAll();
                     tbTimerInterval.Focus();
                     return;
                 }
 
                 Debug.WriteLine("Starting, interval=" + timer.Interval);
+                Next();
                 timer.Start();
                 bStart.Content = "Stop";
             }
         }
-        
 
         private void Next_Click(object sender, RoutedEventArgs e)
         {
@@ -140,6 +140,7 @@ namespace GameOfLife
                 catch
                 {
                     Debug.WriteLine("Error parsing row count");
+                    tbRowCount.SelectAll();
                     tbRowCount.Focus();
                     return;
                 }
@@ -151,6 +152,7 @@ namespace GameOfLife
                 catch
                 {
                     Debug.WriteLine("Error parsing column count");
+                    tbColumnCount.SelectAll();
                     tbColumnCount.Focus();
                     return;
                 }
@@ -160,6 +162,9 @@ namespace GameOfLife
                 // Use row/column count from the existing grid.
                 rowCount = cells.Length;
                 columnCount = cells[0].Length;
+
+                tbRowCount.Text = rowCount.ToString();
+                tbColumnCount.Text = columnCount.ToString();
             }
             Debug.WriteLine("rowCount=" + rowCount + ", columnCount=" + columnCount);
 
