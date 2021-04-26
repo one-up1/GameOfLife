@@ -17,8 +17,9 @@ namespace GameOfLife
     /// </summary>
     public partial class MainWindow : Window
     {
-        private const int ROW_COUNT = 32;
-        private const int COLUMN_COUNT = 64;
+        private int rowCount;
+        private int columnCount;
+        private int moveCount;
 
         private Cell[][] cells;
         private Timer timer;
@@ -27,7 +28,7 @@ namespace GameOfLife
         {
             InitializeComponent();
 
-            timer = new Timer(500);
+            timer = new Timer();
             timer.Elapsed += Timer_Elapsed;
 
             Loaded += MainWindow_Loaded;
@@ -37,12 +38,12 @@ namespace GameOfLife
         {
             AddCells(null);
 
-            // Set default values.
-            cells[12][32].Value = true;
-            cells[13][33].Value = true;
+            // Set default cell values.
+            cells[12][31].Value = true;
+            cells[13][32].Value = true;
             cells[14][30].Value = true;
+            cells[14][31].Value = true;
             cells[14][32].Value = true;
-            cells[14][33].Value = true;
         }
 
         private void Cell_MouseUp(object sender, MouseButtonEventArgs e)
@@ -51,6 +52,29 @@ namespace GameOfLife
             Cell cell = cells[(int)label.GetValue(Grid.RowProperty)]
                 [(int)label.GetValue(Grid.ColumnProperty)];
             cell.Value = !cell.Value;
+        }
+
+        private void Open_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "JSON files (*.json)|*.json";
+            if (ofd.ShowDialog() == true)
+            {
+                AddCells(JsonConvert.DeserializeObject<Cell[][]>(
+                    File.ReadAllText(ofd.FileName)));
+            }
+        }
+
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "JSON files (*.json)|*.json";
+            // Why do we need "== true", ShowDialog() returns a boolean right?
+            if (sfd.ShowDialog() == true)
+            {
+                File.WriteAllText(sfd.FileName,
+                    JsonConvert.SerializeObject(cells));
+            }
         }
 
         private void Start_Click(object sender, RoutedEventArgs e)
@@ -63,34 +87,25 @@ namespace GameOfLife
             }
             else
             {
-                Debug.WriteLine("Starting");
+                // Parse interval.
+                try
+                {
+                    timer.Interval = int.Parse(tbTimerInterval.Text);
+                    if (timer.Interval < 100) throw new Exception();
+                }
+                catch
+                {
+                    Debug.WriteLine("Error parsing timer interval");
+                    tbTimerInterval.Focus();
+                    return;
+                }
+
+                Debug.WriteLine("Starting, interval=" + timer.Interval);
                 timer.Start();
                 bStart.Content = "Stop";
             }
         }
-
-        private void Open_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "JSON files (*.json)|*.json";
-            if (ofd.ShowDialog() == true)
-            {
-               AddCells(JsonConvert.DeserializeObject<Cell[][]>(
-                    File.ReadAllText(ofd.FileName)));
-            }
-        }
-
-        private void Save_Click(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "JSON files (*.json)|*.json";
-            // Why do we need "== true", ShowDialog() return a boolean right?
-            if (sfd.ShowDialog() == true)
-            {
-                File.WriteAllText(sfd.FileName,
-                    JsonConvert.SerializeObject(cells));
-            }
-        }
+        
 
         private void Next_Click(object sender, RoutedEventArgs e)
         {
@@ -113,32 +128,75 @@ namespace GameOfLife
 
         private void AddCells(Cell[][] cells)
         {
+            // Get row/column count.
+            if (cells == null)
+            {
+                // Parse row/column count when no existing grid is being opened.
+                try
+                {
+                    rowCount = int.Parse(tbRowCount.Text);
+                    if (rowCount < 10) throw new Exception();
+                }
+                catch
+                {
+                    Debug.WriteLine("Error parsing row count");
+                    tbRowCount.Focus();
+                    return;
+                }
+                try
+                {
+                    columnCount = int.Parse(tbColumnCount.Text);
+                    if (columnCount < 10) throw new Exception();
+                }
+                catch
+                {
+                    Debug.WriteLine("Error parsing column count");
+                    tbColumnCount.Focus();
+                    return;
+                }
+            }
+            else
+            {
+                // Use row/column count from the existing grid.
+                rowCount = cells.Length;
+                columnCount = cells[0].Length;
+            }
+            Debug.WriteLine("rowCount=" + rowCount + ", columnCount=" + columnCount);
+
+            // Stop any running timer.
+            if (timer.Enabled)
+            {
+                Debug.WriteLine("Stopping timer");
+                timer.Stop();
+                bStart.Content = "Start";
+            }
+
             // Clear any existing cells and row/column definitions.
             grid.Children.Clear();
             grid.RowDefinitions.Clear();
             grid.ColumnDefinitions.Clear();
 
             // Add row/column definitions.
-            for (int i = 0; i < ROW_COUNT; i++)
+            for (int i = 0; i < rowCount; i++)
             {
                 RowDefinition row = new RowDefinition();
                 grid.RowDefinitions.Add(row);
             }
-            for (int i = 0; i < COLUMN_COUNT; i++)
+            for (int i = 0; i < columnCount; i++)
             {
                 ColumnDefinition col = new ColumnDefinition();
                 grid.ColumnDefinitions.Add(col);
             }
 
             // Add cells.
-            this.cells = cells == null ? new Cell[ROW_COUNT][] : cells;
-            for (int row = 0; row < ROW_COUNT; row++)
+            this.cells = cells == null ? new Cell[rowCount][] : cells;
+            for (int row = 0; row < rowCount; row++)
             {
                 if (cells == null)
                 {
-                    this.cells[row] = new Cell[COLUMN_COUNT];
+                    this.cells[row] = new Cell[columnCount];
                 }
-                for (int col = 0; col < COLUMN_COUNT; col++)
+                for (int col = 0; col < columnCount; col++)
                 {
                     Label label = new Label();
                     label.SetValue(Grid.RowProperty, row);
@@ -158,32 +216,44 @@ namespace GameOfLife
                     }
                 }
             }
+
+            // Reset move count.
+            moveCount = 0;
+            lMoveCount.Content = "";
         }
 
         private void Next()
         {
             Debug.WriteLine("Next()");
-            Cell[][] cells = new Cell[ROW_COUNT][];
-            for (int row = 0; row < ROW_COUNT; row++)
+
+            // Create a new Cell[][] as we need the cell values
+            // specified by the user while they are being updated.
+            Cell[][] cells = new Cell[rowCount][];
+            for (int row = 0; row < rowCount; row++)
             {
-                cells[row] = new Cell[COLUMN_COUNT];
-                for (int col = 0; col < COLUMN_COUNT; col++)
+                cells[row] = new Cell[columnCount];
+                for (int col = 0; col < columnCount; col++)
                 {
                     cells[row][col] = new Cell(this.cells[row][col].Label);
                     ProcessCell(cells, row, col);
                 }
             }
             this.cells = cells;
+
+            // Update move count.
+            moveCount++;
+            lMoveCount.Content = moveCount.ToString();
         }
 
         private void ProcessCell(Cell[][] cells, int row, int col)
         {
+            // Determine the number of populated neighbours for this cell.
             int neighbors = 0;
             for (int iRow = row - 1; iRow <= row + 1; iRow++)
             {
                 for (int iCol = col - 1; iCol <= col + 1; iCol++)
                 {
-                    if (iRow >= 0 && iCol >= 0 && iRow < ROW_COUNT && iCol < COLUMN_COUNT
+                    if (iRow >= 0 && iCol >= 0 && iRow < rowCount && iCol < columnCount
                         && !(iRow == row && iCol == col) && this.cells[iRow][iCol].Value)
                     {
                         neighbors++;

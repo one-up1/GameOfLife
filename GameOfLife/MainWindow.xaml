@@ -14,16 +14,19 @@
         
         <Grid.RowDefinitions>
             <RowDefinition />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="90" />
         </Grid.RowDefinitions>
 
         <Grid
             Name="grid"
             Grid.Row="0" />
 
-        <Grid
-            Height="50"
-            Grid.Row="1">
+        <Grid Grid.Row="1">
+
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -65,6 +68,54 @@
                 Content="Clear"
                 Grid.Column="4"
                 Click="Clear_Click" />
+
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                Grid.Row="1"
+                Grid.ColumnSpan="5">
+
+                <Label
+                    Name="lMoveCount"
+                    Width="100"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold" />
+
+                <Label
+                    VerticalAlignment="Center"
+                    Content="Grid size:" />
+
+                <TextBox
+                    Name="tbRowCount"
+                    Width="40"
+                    Margin="0 10 0 10"
+                    Text="32" />
+
+                <Label
+                    VerticalAlignment="Center"
+                    Content="x" />
+
+                <TextBox
+                    Name="tbColumnCount"
+                    Width="40"
+                    Margin="0 10 50 10"
+                    Text="64" />
+
+                <Label
+                    VerticalAlignment="Center"
+                    Content="Speed:" />
+
+                <TextBox
+                    Name="tbTimerInterval"
+                    Width="40"
+                    Margin="0 10 0 10"
+                    Text="350" />
+
+                <Label
+                    VerticalAlignment="Center"
+                    Content="ms" />
+
+            </StackPanel>
 
         </Grid>
     </Grid>
