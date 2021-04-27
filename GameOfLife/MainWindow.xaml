@@ -89,7 +89,7 @@
                     Name="tbRowCount"
                     Width="40"
                     Margin="0 10 0 10"
-                    Text="32" />
+                    Text="16" />
 
                 <Label
                     VerticalAlignment="Center"
@@ -99,7 +99,7 @@
                     Name="tbColumnCount"
                     Width="40"
                     Margin="0 10 50 10"
-                    Text="64" />
+                    Text="32" />
 
                 <Label
                     VerticalAlignment="Center"
@@ -119,7 +119,7 @@
                     Name="cbSnake"
                     VerticalAlignment="Center"
                     Margin="25 0 0 0"
-                    Content="Snake" />
+                    Content="&quot;Snake&quot; mode" />
 
             </StackPanel>
 

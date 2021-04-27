@@ -38,11 +38,11 @@ namespace GameOfLife
             AddCells(null);
 
             // Set default cell values.
-            cells[12][31].Value = true;
-            cells[13][32].Value = true;
-            cells[14][30].Value = true;
-            cells[14][31].Value = true;
-            cells[14][32].Value = true;
+            cells[6][16].Value = true;
+            cells[7][17].Value = true;
+            cells[8][15].Value = true;
+            cells[8][16].Value = true;
+            cells[8][17].Value = true;
         }
 
         private void Cell_MouseUp(object sender, MouseButtonEventArgs e)
@@ -90,7 +90,8 @@ namespace GameOfLife
                 try
                 {
                     timer.Interval = int.Parse(tbTimerInterval.Text);
-                    if (timer.Interval < 100) throw new Exception();
+                    if (timer.Interval < 100)
+                        throw new Exception();
                 }
                 catch
                 {
@@ -135,7 +136,8 @@ namespace GameOfLife
                 try
                 {
                     rowCount = int.Parse(tbRowCount.Text);
-                    if (rowCount < 10) throw new Exception();
+                    if (rowCount < 4 || rowCount > 64)
+                        throw new Exception();
                 }
                 catch
                 {
@@ -147,7 +149,8 @@ namespace GameOfLife
                 try
                 {
                     columnCount = int.Parse(tbColumnCount.Text);
-                    if (columnCount < 10) throw new Exception();
+                    if (columnCount < 4 | columnCount > 64)
+                        throw new Exception();
                 }
                 catch
                 {
@@ -258,7 +261,8 @@ namespace GameOfLife
             {
                 for (int iCol = col - 1; iCol <= col + 1; iCol++)
                 {
-                    if (!(iRow == row && iCol == col) && GetCellValue(iRow, iCol))
+                    if (!(iRow == row && iCol == col) &&
+                        GetCellValue(iRow, iCol))
                     {
                         neighbours++;
                     }
@@ -296,18 +300,21 @@ namespace GameOfLife
             // Why do we need "== true", IsChecked property is a boolean right?
             if (cbSnake.IsChecked == true)
             {
+                // When "snake" mode is used, the grid is treated as "spherical"
+                // and "off-grid" indices "continue" on the other edge.
                 if (row < 0)
-                    row = rowCount + row;
-                if (col < 0)
-                    col = columnCount + col;
-
-                if (row >= rowCount)
+                    row += rowCount;
+                else if (row >= rowCount)
                     row -= rowCount;
-                if (col >= columnCount)
+
+                if (col < 0)
+                    col += columnCount;
+                else if (col >= columnCount)
                     col -= columnCount;
             }
             else if (row < 0 || col < 0 || row >= rowCount || col >= columnCount)
             {
+                // We can't go "off-grid" when "snake" mode is not used.
                 return false;
             }
             return cells[row][col].Value;
