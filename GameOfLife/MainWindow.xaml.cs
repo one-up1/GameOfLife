@@ -253,15 +253,14 @@ namespace GameOfLife
         private void ProcessCell(Cell[][] cells, int row, int col)
         {
             // Determine the number of populated neighbours for this cell.
-            int neighbors = 0;
+            int neighbours = 0;
             for (int iRow = row - 1; iRow <= row + 1; iRow++)
             {
                 for (int iCol = col - 1; iCol <= col + 1; iCol++)
                 {
-                    if (iRow >= 0 && iCol >= 0 && iRow < rowCount && iCol < columnCount
-                        && !(iRow == row && iCol == col) && this.cells[iRow][iCol].Value)
+                    if (!(iRow == row && iCol == col) && GetCellValue(iRow, iCol))
                     {
-                        neighbors++;
+                        neighbours++;
                     }
                 }
             }
@@ -269,7 +268,7 @@ namespace GameOfLife
             if (this.cells[row][col].Value)
             {
                 // For a space that is populated:
-                if (neighbors == 2 || neighbors == 3)
+                if (neighbours == 2 || neighbours == 3)
                 {
                     // Each cell with two or three neighbors survives.
                     cells[row][col].Value = true;
@@ -284,12 +283,34 @@ namespace GameOfLife
             else
             {
                 // For a space that is empty or unpopulated:
-                if (neighbors == 3)
+                if (neighbours == 3)
                 {
                     // Each cell with three neighbors becomes populated.
                     cells[row][col].Value = true;
                 }
             }
+        }
+
+        private bool GetCellValue(int row, int col)
+        {
+            // Why do we need "== true", IsChecked property is a boolean right?
+            if (cbSnake.IsChecked == true)
+            {
+                if (row < 0)
+                    row = rowCount + row;
+                if (col < 0)
+                    col = columnCount + col;
+
+                if (row >= rowCount)
+                    row -= rowCount;
+                if (col >= columnCount)
+                    col -= columnCount;
+            }
+            else if (row < 0 || col < 0 || row >= rowCount || col >= columnCount)
+            {
+                return false;
+            }
+            return cells[row][col].Value;
         }
     }
 }
