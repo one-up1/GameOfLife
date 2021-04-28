@@ -47,9 +47,13 @@ namespace GameOfLife
 
         private void Cell_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            // Get Cell from the array[][] based on the row/column of the Label.
             Label label = (Label)sender;
             Cell cell = cells[(int)label.GetValue(Grid.RowProperty)]
                 [(int)label.GetValue(Grid.ColumnProperty)];
+
+            // Reset any color and toggle cell value.
+            cell.Color = null;
             cell.Value = !cell.Value;
         }
 
@@ -57,6 +61,7 @@ namespace GameOfLife
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "JSON files (*.json)|*.json";
+            // Why do we need "== true", ShowDialog() returns a boolean right?
             if (ofd.ShowDialog() == true)
             {
                 AddCells(JsonConvert.DeserializeObject<Cell[][]>(
@@ -149,7 +154,7 @@ namespace GameOfLife
                 try
                 {
                     columnCount = int.Parse(tbColumnCount.Text);
-                    if (columnCount < 4 | columnCount > 64)
+                    if (columnCount < 4 || columnCount > 64)
                         throw new Exception();
                 }
                 catch
@@ -274,7 +279,9 @@ namespace GameOfLife
                 // For a space that is populated:
                 if (neighbours == 2 || neighbours == 3)
                 {
-                    // Each cell with two or three neighbors survives.
+                    // Each cell with two or three neighbors survives
+                    // and gets a fancy color.
+                    cells[row][col].Color = neighbours == 2 ? Brushes.Red : Brushes.Blue;
                     cells[row][col].Value = true;
                 }
                 else
@@ -289,7 +296,9 @@ namespace GameOfLife
                 // For a space that is empty or unpopulated:
                 if (neighbours == 3)
                 {
-                    // Each cell with three neighbors becomes populated.
+                    // Each cell with three neighbors becomes populated
+                    // and gets a fancy color.
+                    cells[row][col].Color = Brushes.Yellow;
                     cells[row][col].Value = true;
                 }
             }

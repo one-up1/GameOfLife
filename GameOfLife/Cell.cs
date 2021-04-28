@@ -46,11 +46,16 @@ namespace GameOfLife
             }
         }
 
+        [JsonIgnore]
+        public Brush Color { get; set; }
+
         private void SetLabelBackground()
         {
             if (label != null)
             {
-                label.Background = value ? Brushes.Red : Brushes.Transparent;
+                label.Background = value ?
+                    (Color == null ? Brushes.Black : Color) :
+                    Brushes.Transparent;
             }
         }
     }
