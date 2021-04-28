@@ -215,7 +215,7 @@ namespace GameOfLife
                     label.SetValue(Grid.RowProperty, row);
                     label.SetValue(Grid.ColumnProperty, col);
                     label.BorderThickness = new Thickness(1);
-                    label.BorderBrush = Brushes.Black;
+                    label.BorderBrush = Brushes.DarkSlateGray;
                     label.MouseUp += Cell_MouseUp;
                     grid.Children.Add(label);
 
@@ -279,9 +279,12 @@ namespace GameOfLife
                 // For a space that is populated:
                 if (neighbours == 2 || neighbours == 3)
                 {
-                    // Each cell with two or three neighbors survives
-                    // and gets a fancy color.
-                    cells[row][col].Color = neighbours == 2 ? Brushes.Red : Brushes.Blue;
+                    // Each cell with two or three neighbors survives.
+                    if (cbFancyColors.IsChecked == true)
+                    {
+                        // And gets a fancy color.
+                        cells[row][col].Color = neighbours == 2 ? Brushes.Red : Brushes.Blue;
+                    }
                     cells[row][col].Value = true;
                 }
                 else
@@ -296,9 +299,12 @@ namespace GameOfLife
                 // For a space that is empty or unpopulated:
                 if (neighbours == 3)
                 {
-                    // Each cell with three neighbors becomes populated
-                    // and gets a fancy color.
-                    cells[row][col].Color = Brushes.Yellow;
+                    // Each cell with three neighbors becomes populated.
+                    if (cbFancyColors.IsChecked == true)
+                    {
+                        // And gets a fancy color.
+                        cells[row][col].Color = Brushes.Yellow;
+                    }
                     cells[row][col].Value = true;
                 }
             }
