@@ -17,7 +17,7 @@ namespace GameOfLife
     public partial class MainWindow : Window
     {
         private int rowCount, columnCount;
-        private int moveCount, cellCount;
+        private int cellCount, moveCount;
 
         private Cell[][] cells;
         private Timer timer;
@@ -25,11 +25,10 @@ namespace GameOfLife
         public MainWindow()
         {
             InitializeComponent();
+            Loaded += MainWindow_Loaded;
 
             timer = new Timer();
             timer.Elapsed += Timer_Elapsed;
-
-            Loaded += MainWindow_Loaded;
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -42,7 +41,7 @@ namespace GameOfLife
             cells[8][15].Value = true;
             cells[8][16].Value = true;
             cells[8][17].Value = true;
-            cellCount = 5;
+            SetCountLabel(lCellCount, cellCount = 5);
         }
 
         private void Cell_MouseUp(object sender, MouseButtonEventArgs e)
@@ -64,19 +63,20 @@ namespace GameOfLife
                 cell.Value = true;
                 cellCount++;
             }
-            lCellCount.Content = cellCount.ToString();
+            SetCountLabel(lCellCount, cellCount);
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "JSON files (*.json)|*.json";
-            // Why do we need "== true", ShowDialog() returns a boolean right?
-            if (ofd.ShowDialog() == true)
+
+            if (ofd.ShowDialog() == true) // Why do we need "== true", ShowDialog() returns a boolean right?
             {
+                // Deserialize Cel[][] from JSON file, add them to the grid and update cell count.
                 AddCells(JsonConvert.DeserializeObject<Cell[][]>(
                     File.ReadAllText(ofd.FileName)));
-                lCellCount.Content = cellCount.ToString();
+                SetCountLabel(lCellCount, cellCount);
             }
         }
 
@@ -84,9 +84,10 @@ namespace GameOfLife
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "JSON files (*.json)|*.json";
-            // Why do we need "== true", ShowDialog() returns a boolean right?
-            if (sfd.ShowDialog() == true)
+            
+            if (sfd.ShowDialog() == true) // Why do we need "== true", ShowDialog() returns a boolean right?
             {
+                // Serialize Cell[][] to JSON file.
                 File.WriteAllText(sfd.FileName,
                     JsonConvert.SerializeObject(cells));
             }
@@ -132,7 +133,7 @@ namespace GameOfLife
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
             AddCells(null);
-            lCellCount.Content = "0";
+            lCellCount.Content = "";
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -213,9 +214,12 @@ namespace GameOfLife
                 grid.ColumnDefinitions.Add(col);
             }
 
+            // Reset cell/move count.
+            cellCount = 0;
+            SetCountLabel(lMoveCount, moveCount = 0);
+
             // Add cells.
             this.cells = cells == null ? new Cell[rowCount][] : cells;
-            cellCount = 0;
             for (int row = 0; row < rowCount; row++)
             {
                 if (cells == null)
@@ -246,10 +250,6 @@ namespace GameOfLife
                     }
                 }
             }
-
-            // Reset move count.
-            moveCount = 0;
-            lMoveCount.Content = "";
         }
 
         private void Next()
@@ -270,10 +270,9 @@ namespace GameOfLife
             }
             this.cells = cells;
 
-            // Update move count and cell count.
-            moveCount++;
-            lMoveCount.Content = moveCount.ToString();
-            lCellCount.Content = cellCount.ToString();
+            // Update cell/move count.
+            SetCountLabel(lCellCount, cellCount);
+            SetCountLabel(lMoveCount, ++moveCount);
         }
 
         private void ProcessCell(Cell[][] cells, int row, int col)
@@ -298,7 +297,7 @@ namespace GameOfLife
                 if (neighbours == 2 || neighbours == 3)
                 {
                     // Each cell with two or three neighbors survives.
-                    if (cbFancyColors.IsChecked == true)
+                    if (cbFancyColors.IsChecked == true) // Why do we need "== true", IsChecked property is a boolean right?
                     {
                         // And gets a fancy color.
                         cells[row][col].Color = neighbours == 2 ? Brushes.Red : Brushes.Blue;
@@ -319,7 +318,7 @@ namespace GameOfLife
                 if (neighbours == 3)
                 {
                     // Each cell with three neighbors becomes populated.
-                    if (cbFancyColors.IsChecked == true)
+                    if (cbFancyColors.IsChecked == true) // Why do we need "== true", IsChecked property is a boolean right?
                     {
                         // And gets a fancy color.
                         cells[row][col].Color = Brushes.Yellow;
@@ -332,8 +331,7 @@ namespace GameOfLife
 
         private bool GetCellValue(int row, int col)
         {
-            // Why do we need "== true", IsChecked property is a boolean right?
-            if (cbSnake.IsChecked == true)
+            if (cbSnake.IsChecked == true) // Why do we need "== true", IsChecked property is a boolean right?
             {
                 // When "snake" mode is used, the grid is treated as "spherical"
                 // and "off-grid" indices "continue" on the other edge.
@@ -353,6 +351,11 @@ namespace GameOfLife
                 return false;
             }
             return cells[row][col].Value;
+        }
+
+        private static void SetCountLabel(Label label, int count)
+        {
+            label.Content = count == 0 ? "" : count.ToString();
         }
     }
 }

@@ -144,8 +144,7 @@
                 Name="lCellCount"
                 VerticalAlignment="Center"
                 Margin="5 0 5 0"
-                FontWeight="Bold"
-                Content="5" />
+                FontWeight="Bold" />
 
         </StackPanel>
     </Grid>
