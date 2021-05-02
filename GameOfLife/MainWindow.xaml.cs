@@ -16,9 +16,8 @@ namespace GameOfLife
     /// </summary>
     public partial class MainWindow : Window
     {
-        private int rowCount;
-        private int columnCount;
-        private int moveCount;
+        private int rowCount, columnCount;
+        private int moveCount, cellCount;
 
         private Cell[][] cells;
         private Timer timer;
@@ -43,6 +42,7 @@ namespace GameOfLife
             cells[8][15].Value = true;
             cells[8][16].Value = true;
             cells[8][17].Value = true;
+            cellCount = 5;
         }
 
         private void Cell_MouseUp(object sender, MouseButtonEventArgs e)
@@ -52,9 +52,19 @@ namespace GameOfLife
             Cell cell = cells[(int)label.GetValue(Grid.RowProperty)]
                 [(int)label.GetValue(Grid.ColumnProperty)];
 
-            // Reset any color and toggle cell value.
+            // Reset any color, toggle cell value and update cell count.
             cell.Color = null;
-            cell.Value = !cell.Value;
+            if (cell.Value)
+            {
+                cell.Value = false;
+                cellCount--;
+            }
+            else
+            {
+                cell.Value = true;
+                cellCount++;
+            }
+            lCellCount.Content = cellCount.ToString();
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)
@@ -66,6 +76,7 @@ namespace GameOfLife
             {
                 AddCells(JsonConvert.DeserializeObject<Cell[][]>(
                     File.ReadAllText(ofd.FileName)));
+                lCellCount.Content = cellCount.ToString();
             }
         }
 
@@ -121,6 +132,7 @@ namespace GameOfLife
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
             AddCells(null);
+            lCellCount.Content = "0";
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -203,6 +215,7 @@ namespace GameOfLife
 
             // Add cells.
             this.cells = cells == null ? new Cell[rowCount][] : cells;
+            cellCount = 0;
             for (int row = 0; row < rowCount; row++)
             {
                 if (cells == null)
@@ -225,7 +238,11 @@ namespace GameOfLife
                     }
                     else
                     {
-                        this.cells[row][col].Label = label;
+                        cells[row][col].Label = label;
+                        if (cells[row][col].Value)
+                        {
+                            cellCount++;
+                        }
                     }
                 }
             }
@@ -253,9 +270,10 @@ namespace GameOfLife
             }
             this.cells = cells;
 
-            // Update move count.
+            // Update move count and cell count.
             moveCount++;
             lMoveCount.Content = moveCount.ToString();
+            lCellCount.Content = cellCount.ToString();
         }
 
         private void ProcessCell(Cell[][] cells, int row, int col)
@@ -292,6 +310,7 @@ namespace GameOfLife
                     // Each cell with one or no neighbors dies, as if by solitude.
                     // Each cell with four or more neighbors dies, as if by overpopulation.
                     cells[row][col].Value = false;
+                    cellCount--;
                 }
             }
             else
@@ -306,6 +325,7 @@ namespace GameOfLife
                         cells[row][col].Color = Brushes.Yellow;
                     }
                     cells[row][col].Value = true;
+                    cellCount++;
                 }
             }
         }

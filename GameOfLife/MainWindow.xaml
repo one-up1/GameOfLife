@@ -90,20 +90,19 @@
             <CheckBox
                 Name="cbSnake"
                 VerticalAlignment="Center"
-                Margin="10 0 10 0"
+                Margin="5 0 5 0"
                 Content="&quot;Snake&quot; mode" />
 
             <CheckBox
                 Name="cbFancyColors"
                 VerticalAlignment="Center"
-                Margin="10 0 10 0"
+                Margin="5 0 5 0"
                 Content="Fancy colors" />
 
             <Label
                 Name="lMoveCount"
-                Width="38"
                 VerticalAlignment="Center"
-                Margin="10 0 10 0"
+                Margin="5 0 5 0"
                 FontWeight="Bold" />
 
         </StackPanel>
@@ -140,6 +139,13 @@
                 Width="32"
                 VerticalAlignment="Center"
                 Text="32" />
+
+            <Label
+                Name="lCellCount"
+                VerticalAlignment="Center"
+                Margin="5 0 5 0"
+                FontWeight="Bold"
+                Content="5" />
 
         </StackPanel>
     </Grid>
